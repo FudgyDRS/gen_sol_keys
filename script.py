@@ -7,28 +7,33 @@ def generate_keypairs(num_keypairs):
     keypairs = []
     for _ in range(num_keypairs):
         keypair = Keypair()
-        private_key = json.dumps(keypair.to_bytes_array())
+        private_key_bytes = json.dumps(keypair.to_bytes_array())
+        private_key_base58 = keypair.__str__()
         public_key = str(keypair.pubkey())
-        keypairs.append((private_key, public_key))
+        keypairs.append((private_key_bytes, private_key_base58, public_key))
     return keypairs
 
 def generate_keypair_csv(file_path, keypairs):
     # Check if the CSV file exists
     csv_exists = os.path.exists(file_path)
     with open(file_path, mode='a', newline='') as csvfile:
-        fieldnames = ['private_key', 'public_key']
+        fieldnames = ['private_key_bytes', 'private_key_base58', 'public_key']
         writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
         # Write header if the file is newly created
         if not csv_exists:
             writer.writeheader()
-        for private_key, public_key in keypairs:
-            writer.writerow({'private_key': private_key, 'public_key': public_key})
+        for private_key_bytes, private_key_base58, public_key in keypairs:
+            writer.writerow({
+                'private_key_bytes': private_key_bytes,
+                'private_key_base58': private_key_base58,
+                'public_key': public_key
+            })
 
 def generate_public_key_csv(file_path, keypairs):
     with open(file_path, mode='a', newline='') as csvfile:
         fieldnames = ['public_key']
         writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
-        for _, public_key in keypairs:
+        for _, _, public_key in keypairs:
             writer.writerow({'public_key': public_key})
 
 # Prompt the user to input the number of keypairs to generate
